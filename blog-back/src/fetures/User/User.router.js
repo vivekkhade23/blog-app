@@ -28,10 +28,16 @@ app.post("/login",async (req, res) => {
     {id:user._id,email:user.email,age:user.age},
     "SECRET1234",
     {
-        expiresIn:"7 days"
+        expiresIn:"1 hr"
     }
     )
-   res.send({message:"Login successful",token});
+    const refreshtoken=jwt.sign({},
+        "REFRESHSECRET1234",
+        {
+            expiresIn:"7 days"
+        }
+    )
+   res.send({message:"Login successful",token,refreshtoken});
 })
 
 app.get("/:id",async(req,res)=>{
