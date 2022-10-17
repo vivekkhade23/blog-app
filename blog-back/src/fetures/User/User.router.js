@@ -1,10 +1,11 @@
 const express = require('express')
 const UserModel = require("./User.model.js")
 const jwt=require("jsonwebtoken")
-const passport=require("./configs/google.oauth")
 
 
-const app = express();
+const app = express.Router();
+
+const blacklist=[];
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -56,13 +57,16 @@ return res.send(user);
 }
 catch(e){
     console.log(e.message);
+    if(e.message==="jwt expired"){
+        blacklist.push(token)
+    }
     return res.status(401).send("Token is Invalid")
 }
 })
 
 app.post("/refresh",async(req,res)=>{
-    const refreshtoken=req.body.authorization;
-if(backlist.includes(token)){
+    const refreshtoken=req.headers.authorization;
+if(blacklist.includes(refreshtoken)){
     return res.status(401).send("Token is blacklisted")
 }
     try{
@@ -75,8 +79,9 @@ return res.send("refresh token invalid");
 })
 
 app.post("/logout",(req,res)=>{
-    const token =req.body.authorization;
-    backlist.push(token);
+    const token =req.headers.authorization;
+    blacklist.push(token);
+    res.send("logout success")
 })
 
 //github
@@ -90,17 +95,8 @@ app.get('/github/callback', (req, res) => {
     
     })
 
-//google
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile',"email"] }));
 
-app.get('/auth/google/callback', 
-  passport.authenticate('google', { failureRedirect: '/login',session:false }),
-  function(req, res) {
-    // Successful authentication, redirect home.
-    console.log(req.user)
-    res.redirect('/');
-  });
+
 
 
 module.exports=app;
