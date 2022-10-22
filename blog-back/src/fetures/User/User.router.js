@@ -15,7 +15,7 @@ app.use(express.json())
 app.post("/signup",async (req, res) => {
     const { email, password, age } = req.body;
     console.log(email, password, age);
-    const user = new UserModel({ email, password, age })
+    const user = new UserModel({ email, password, age,role:"User" })
     await user.save();
     res.send("user created successsfully");
 })
@@ -27,7 +27,7 @@ app.post("/login",async (req, res) => {
     return res.send("Invalid credentials");
    }
    const token=jwt.sign(
-    {id:user._id,email:user.email,age:user.age},
+    {id:user._id,email:user.email,role:user.role,},
     "SECRET1234",
     {
         expiresIn:"1 hr"
